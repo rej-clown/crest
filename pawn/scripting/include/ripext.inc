@@ -3,7 +3,6 @@
 #endif
 #define _ripext_included_
 
-#include <ripext/json>
 #include <ripext/http>
 
 /**

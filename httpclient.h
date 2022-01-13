@@ -33,7 +33,7 @@ public:
 
 	struct curl_slist *BuildHeaders(const char *acceptTypes, const char *contentType);
 
-	void Request(const char *method, const char *endpoint, json_t *data, IPluginFunction *callback, cell_t value);
+	void Request(const char *method, const char *endpoint, char *data, IPluginFunction *callback, cell_t value);
 
 	void DownloadFile(const char *endpoint, const char *path, IPluginFunction *callback, cell_t value);
 	void UploadFile(const char *endpoint, const char *path, IPluginFunction *callback, cell_t value);

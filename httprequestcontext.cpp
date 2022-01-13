@@ -79,7 +79,7 @@ static size_t ReceiveResponseHeader(char *buffer, size_t size, size_t nmemb, voi
 	return total;
 }
 
-HTTPRequestContext::HTTPRequestContext(const std::string &method, const std::string &url, json_t *data,
+HTTPRequestContext::HTTPRequestContext(const std::string &method, const std::string &url, char *data,
 	struct curl_slist *headers, IChangeableForward *forward, cell_t value,
 	long connectTimeout, long maxRedirects, long timeout, curl_off_t maxSendSpeed, curl_off_t maxRecvSpeed,
 	bool useBasicAuth, const std::string &username, const std::string &password)
@@ -89,8 +89,8 @@ HTTPRequestContext::HTTPRequestContext(const std::string &method, const std::str
 {
 	if (data != NULL)
 	{
-		body = json_dumps(data, 0);
-		size = (body == NULL) ? 0 : strlen(body);
+		size = strlen(data);
+		memcpy(body, data, size);
 	}
 }
 

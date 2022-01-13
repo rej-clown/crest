@@ -29,7 +29,7 @@ class HTTPRequest
 public:
 	HTTPRequest(const std::string &url);
 
-	void Perform(const char *method, json_t *data, IChangeableForward *forward, cell_t value);
+	void Perform(const char *method, char *data, IChangeableForward *forward, cell_t value);
 	void DownloadFile(const char *path, IChangeableForward *forward, cell_t value);
 	void UploadFile(const char *path, IChangeableForward *forward, cell_t value);
 	void PostForm(IChangeableForward *forward, cell_t value);

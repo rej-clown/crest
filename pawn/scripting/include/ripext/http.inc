@@ -228,12 +228,7 @@ methodmap HTTPResponse
 	// @return           True on success, false if the header was not found.
 	public native bool GetHeader(const char[] name, char[] buffer, int maxlength);
 
-	// Retrieves the JSON data of the response.
-	//
-	// @error            Invalid JSON response.
-	property JSON Data {
-		public native get();
-	}
+	public native int GetDataBody(const char[] name, int maxlength);
 
 	// Retrieves the HTTP status of the response.
 	property HTTPStatus Status {

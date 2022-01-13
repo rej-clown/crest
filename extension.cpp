@@ -51,12 +51,6 @@ HandleType_t		htHTTPRequest;
 HTTPResponseHandler	g_HTTPResponseHandler;
 HandleType_t			htHTTPResponse;
 
-JSONHandler		g_JSONHandler;
-HandleType_t		htJSON;
-
-JSONObjectKeysHandler	g_JSONObjectKeysHandler;
-HandleType_t			htJSONObjectKeys;
-
 static void CheckCompletedRequests()
 {
 	CURLMsg *message;
@@ -215,7 +209,6 @@ static void FrameHook(bool simulating)
 bool RipExt::SDK_OnLoad(char *error, size_t maxlength, bool late)
 {
 	sharesys->AddNatives(myself, http_natives);
-	sharesys->AddNatives(myself, json_natives);
 	sharesys->RegisterLibrary(myself, "ripext");
 
 	/* Initialize cURL */
@@ -252,8 +245,6 @@ bool RipExt::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	htHTTPClient = handlesys->CreateType("HTTPClient", &g_HTTPClientHandler, 0, NULL, NULL, myself->GetIdentity(), NULL);
 	htHTTPRequest = handlesys->CreateType("HTTPRequest", &g_HTTPRequestHandler, 0, NULL, NULL, myself->GetIdentity(), NULL);
 	htHTTPResponse = handlesys->CreateType("HTTPResponse", &g_HTTPResponseHandler, 0, NULL, &haHTTPResponse, myself->GetIdentity(), NULL);
-	htJSON = handlesys->CreateType("JSON", &g_JSONHandler, 0, NULL, &haJSON, myself->GetIdentity(), NULL);
-	htJSONObjectKeys = handlesys->CreateType("JSONObjectKeys", &g_JSONObjectKeysHandler, 0, NULL, NULL, myself->GetIdentity(), NULL);
 
 	smutils->AddGameFrameHook(&FrameHook);
 	smutils->BuildPath(Path_SM, caBundlePath, sizeof(caBundlePath), SM_RIPEXT_CA_BUNDLE_PATH);
@@ -273,8 +264,6 @@ void RipExt::SDK_OnUnload()
 	handlesys->RemoveType(htHTTPClient, myself->GetIdentity());
 	handlesys->RemoveType(htHTTPRequest, myself->GetIdentity());
 	handlesys->RemoveType(htHTTPResponse, myself->GetIdentity());
-	handlesys->RemoveType(htJSON, myself->GetIdentity());
-	handlesys->RemoveType(htJSONObjectKeys, myself->GetIdentity());
 
 	smutils->RemoveGameFrameHook(&FrameHook);
 }
@@ -299,14 +288,4 @@ void HTTPRequestHandler::OnHandleDestroy(HandleType_t type, void *object)
 void HTTPResponseHandler::OnHandleDestroy(HandleType_t type, void *object)
 {
 	/* Response objects are automatically cleaned up */
-}
-
-void JSONHandler::OnHandleDestroy(HandleType_t type, void *object)
-{
-	json_decref((json_t *)object);
-}
-
-void JSONObjectKeysHandler::OnHandleDestroy(HandleType_t type, void *object)
-{
-	delete (struct JSONObjectKeys *)object;
 }

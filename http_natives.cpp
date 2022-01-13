@@ -38,21 +38,6 @@ static HTTPRequest *GetRequestFromHandle(IPluginContext *pContext, Handle_t hndl
 	return request;
 }
 
-static json_t *GetJSONFromHandle(IPluginContext *pContext, Handle_t hndl)
-{
-	HandleError err;
-	HandleSecurity sec(pContext->GetIdentity(), myself->GetIdentity());
-
-	json_t *json;
-	if ((err=handlesys->ReadHandle(hndl, htJSON, &sec, (void **)&json)) != HandleError_None)
-	{
-		pContext->ThrowNativeError("Invalid JSON handle %x (error %d)", hndl, err);
-		return NULL;
-	}
-
-	return json;
-}
-
 static cell_t CreateClient(IPluginContext *pContext, const cell_t *params)
 {
 	char *baseURL;
@@ -139,12 +124,8 @@ static cell_t PostRequest(IPluginContext *pContext, const cell_t *params)
 	char *endpoint;
 	pContext->LocalToString(params[2], &endpoint);
 
-	json_t *data;
-	Handle_t hndlData = static_cast<Handle_t>(params[3]);
-	if ((err=handlesys->ReadHandle(hndlData, htJSON, &sec, (void **)&data)) != HandleError_None)
-	{
-		return pContext->ThrowNativeError("Invalid data handle %x (error %d)", hndlData, err);
-	}
+	char *data;
+	pContext->LocalToString(params[3], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[4]);
 	cell_t value = params[5];
@@ -169,12 +150,8 @@ static cell_t PutRequest(IPluginContext *pContext, const cell_t *params)
 	char *endpoint;
 	pContext->LocalToString(params[2], &endpoint);
 
-	json_t *data;
-	Handle_t hndlData = static_cast<Handle_t>(params[3]);
-	if ((err=handlesys->ReadHandle(hndlData, htJSON, &sec, (void **)&data)) != HandleError_None)
-	{
-		return pContext->ThrowNativeError("Invalid data handle %x (error %d)", hndlData, err);
-	}
+	char *data;
+	pContext->LocalToString(params[3], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[4]);
 	cell_t value = params[5];
@@ -199,12 +176,8 @@ static cell_t PatchRequest(IPluginContext *pContext, const cell_t *params)
 	char *endpoint;
 	pContext->LocalToString(params[2], &endpoint);
 
-	json_t *data;
-	Handle_t hndlData = static_cast<Handle_t>(params[3]);
-	if ((err=handlesys->ReadHandle(hndlData, htJSON, &sec, (void **)&data)) != HandleError_None)
-	{
-		return pContext->ThrowNativeError("Invalid data handle %x (error %d)", hndlData, err);
-	}
+	char *data;
+	pContext->LocalToString(params[3], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[4]);
 	cell_t value = params[5];
@@ -625,11 +598,8 @@ static cell_t PerformPostRequest(IPluginContext *pContext, const cell_t *params)
 		return 0;
 	}
 
-	json_t *data = GetJSONFromHandle(pContext, params[2]);
-	if (data == NULL)
-	{
-		return 0;
-	}
+	char *data;
+	pContext->LocalToString(params[2], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[3]);
 	cell_t value = params[4];
@@ -657,11 +627,8 @@ static cell_t PerformPutRequest(IPluginContext *pContext, const cell_t *params)
 		return 0;
 	}
 
-	json_t *data = GetJSONFromHandle(pContext, params[2]);
-	if (data == NULL)
-	{
-		return 0;
-	}
+	char *data;
+	pContext->LocalToString(params[2], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[3]);
 	cell_t value = params[4];
@@ -689,11 +656,8 @@ static cell_t PerformPatchRequest(IPluginContext *pContext, const cell_t *params
 		return 0;
 	}
 
-	json_t *data = GetJSONFromHandle(pContext, params[2]);
-	if (data == NULL)
-	{
-		return 0;
-	}
+	char *data;
+	pContext->LocalToString(params[2], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[3]);
 	cell_t value = params[4];
@@ -954,28 +918,8 @@ static cell_t GetResponseData(IPluginContext *pContext, const cell_t *params)
 		return BAD_HANDLE;
 	}
 
-	/* Return the same handle every time we get the HTTP response data */
-	if (response->hndlData == BAD_HANDLE)
-	{
-		json_error_t error;
-		response->data = json_loads(response->body, 0, &error);
-		if (response->data == NULL)
-		{
-			pContext->ThrowNativeError("Invalid JSON in line %d, column %d: %s", error.line, error.column, error.text);
-			return BAD_HANDLE;
-		}
-
-		response->hndlData = handlesys->CreateHandleEx(htJSON, response->data, &sec, NULL, NULL);
-		if (response->hndlData == BAD_HANDLE)
-		{
-			json_decref(response->data);
-
-			pContext->ThrowNativeError("Could not create data handle.");
-			return BAD_HANDLE;
-		}
-	}
-
-	return response->hndlData;
+	pContext->StringToLocal(params[1], params[2], (response->body));
+	return response->size;
 }
 
 static cell_t GetResponseStatus(IPluginContext *pContext, const cell_t *params)
@@ -1070,7 +1014,7 @@ const sp_nativeinfo_t http_natives[] =
 	{"HTTPRequest.MaxSendSpeed.set",	SetRequestMaxSendSpeed},
 	{"HTTPRequest.Timeout.get",			GetRequestTimeout},
 	{"HTTPRequest.Timeout.set",			SetRequestTimeout},
-	{"HTTPResponse.Data.get",			GetResponseData},
+	{"HTTPResponse.GetDataBody",		GetResponseData},
 	{"HTTPResponse.Status.get",			GetResponseStatus},
 	{"HTTPResponse.GetHeader",			GetResponseHeader},
 
