@@ -71,7 +71,7 @@ struct CurlContext {
 
 struct HTTPResponse {
 	long status = 0;
-	json_t *data = NULL;
+	char *data = NULL;
 	Handle_t hndlData = BAD_HANDLE;
 	HTTPHeaderMap headers;
 
