@@ -132,7 +132,7 @@ methodmap HTTPRequest < Handle
 	// @param data       JSON data to send.
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
-	public native void Post(JSON data, HTTPRequestCallback callback, any value = 0);
+	public native void Post(char[] data, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP PUT request.
 	//
@@ -141,7 +141,7 @@ methodmap HTTPRequest < Handle
 	// @param data       JSON data to send.
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
-	public native void Put(JSON data, HTTPRequestCallback callback, any value = 0);
+	public native void Put(char[] data, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP PATCH request.
 	//
@@ -150,7 +150,7 @@ methodmap HTTPRequest < Handle
 	// @param data       JSON data to send.
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
-	public native void Patch(JSON data, HTTPRequestCallback callback, any value = 0);
+	public native void Patch(char[] data, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP DELETE request.
 	//
@@ -228,7 +228,17 @@ methodmap HTTPResponse
 	// @return           True on success, false if the header was not found.
 	public native bool GetHeader(const char[] name, char[] buffer, int maxlength);
 
-	public native int GetDataBody(const char[] name, int maxlength);
+	// Retrieves an json body from the response.
+	//
+	// @param buffer     String buffer to store value.
+	// @param maxlength  Maximum length of the string buffer.
+	// @return           error code (0 on success).
+	public native int GetData(char[] buffer, int maxlength);
+
+	// Retrieves the data length of the response.
+	property int DataLength {
+		public native get();
+	}
 
 	// Retrieves the HTTP status of the response.
 	property HTTPStatus Status {
@@ -269,7 +279,7 @@ methodmap HTTPClient < Handle
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
 	#pragma deprecated Use HTTPRequest.Post() instead.
-	public native void Post(const char[] endpoint, JSON data, HTTPRequestCallback callback, any value = 0);
+	public native void Post(const char[] endpoint, char[] data, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP PUT request.
 	//
@@ -278,7 +288,7 @@ methodmap HTTPClient < Handle
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
 	#pragma deprecated Use HTTPRequest.Put() instead.
-	public native void Put(const char[] endpoint, JSON data, HTTPRequestCallback callback, any value = 0);
+	public native void Put(const char[] endpoint, char[] data, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP PATCH request.
 	//
@@ -287,7 +297,7 @@ methodmap HTTPClient < Handle
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
 	#pragma deprecated Use HTTPRequest.Patch() instead.
-	public native void Patch(const char[] endpoint, JSON data, HTTPRequestCallback callback, any value = 0);
+	public native void Patch(const char[] endpoint, char[] data, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP DELETE request.
 	//

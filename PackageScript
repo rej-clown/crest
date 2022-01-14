@@ -40,7 +40,7 @@ CopyFiles('pawn/scripting/include', 'addons/sourcemod/scripting/include',
   [ 'ripext.inc' ]
 )
 CopyFiles('pawn/scripting/include/ripext', 'addons/sourcemod/scripting/include/ripext',
-  [ 'http.inc', 'json.inc' ]
+  [ 'http.inc' ]
 )
 
 # GameData files
@@ -56,7 +56,7 @@ CopyFiles('pawn/scripting/include/ripext', 'addons/sourcemod/scripting/include/r
 #  'otherconfig.cfg,
 #  ]
 #)
-CopyFiles(builder.buildPath, 'addons/sourcemod/configs/ripext',
+CopyFiles('pawn/configs/ripext', 'addons/sourcemod/configs/ripext',
   [ 'ca-bundle.crt' ]
 )
 

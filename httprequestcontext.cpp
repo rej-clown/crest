@@ -87,11 +87,11 @@ HTTPRequestContext::HTTPRequestContext(const std::string &method, const std::str
 	connectTimeout(connectTimeout), maxRedirects(maxRedirects), timeout(timeout), maxSendSpeed(maxSendSpeed),
 	maxRecvSpeed(maxRecvSpeed), useBasicAuth(useBasicAuth), username(username), password(password)
 {
+	size = (data != NULL) ? strlen(data) : 0;
+
 	if (data != NULL)
-	{
-		size = strlen(data);
 		memcpy(body, data, size);
-	}
+
 }
 
 HTTPRequestContext::~HTTPRequestContext()

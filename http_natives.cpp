@@ -913,13 +913,10 @@ static cell_t GetResponseData(IPluginContext *pContext, const cell_t *params)
 	struct HTTPResponse *response;
 	Handle_t hndlResponse = static_cast<Handle_t>(params[1]);
 	if ((err=handlesys->ReadHandle(hndlResponse, htHTTPResponse, &sec, (void **)&response)) != HandleError_None)
-	{
-		pContext->ThrowNativeError("Invalid HTTP response handle %x (error %d)", hndlResponse, err);
-		return BAD_HANDLE;
-	}
+		return pContext->ThrowNativeError("Invalid HTTP response handle %x (error %d)", hndlResponse, err);
 
 	pContext->StringToLocal(params[1], params[2], (response->body));
-	return response->size;
+	return 0;
 }
 
 static cell_t GetResponseStatus(IPluginContext *pContext, const cell_t *params)
@@ -936,6 +933,20 @@ static cell_t GetResponseStatus(IPluginContext *pContext, const cell_t *params)
 
 	return response->status;
 }
+
+static cell_t GetResponseDataLength(IPluginContext *pContext, const cell_t *params)
+{
+	HandleError err;
+	HandleSecurity sec(pContext->GetIdentity(), myself->GetIdentity());
+
+	struct HTTPResponse *response;
+	Handle_t hndlResponse = static_cast<Handle_t>(params[1]);
+	if ((err=handlesys->ReadHandle(hndlResponse, htHTTPResponse, &sec, (void **)&response)) != HandleError_None)
+		return pContext->ThrowNativeError("Invalid HTTP response handle %x (error code %d)", hndlResponse, err);
+
+	return response->size;
+}
+
 
 static cell_t GetResponseHeader(IPluginContext *pContext, const cell_t *params)
 {
@@ -1014,8 +1025,9 @@ const sp_nativeinfo_t http_natives[] =
 	{"HTTPRequest.MaxSendSpeed.set",	SetRequestMaxSendSpeed},
 	{"HTTPRequest.Timeout.get",			GetRequestTimeout},
 	{"HTTPRequest.Timeout.set",			SetRequestTimeout},
-	{"HTTPResponse.GetDataBody",		GetResponseData},
+	{"HTTPResponse.GetData",			GetResponseData},
 	{"HTTPResponse.Status.get",			GetResponseStatus},
+	{"HTTPResponse.DataLength.get",		GetResponseDataLength},
 	{"HTTPResponse.GetHeader",			GetResponseHeader},
 
 	{NULL,								NULL}
