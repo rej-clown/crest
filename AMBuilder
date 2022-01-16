@@ -2,14 +2,13 @@
 import os
 
 libcurl = builder.Build('curl/lib/AMBuilder')
-libjansson = builder.Build('jansson/src/AMBuilder')
 libmbedtls = builder.Build('mbedtls/library/AMBuilder')
 libnghttp2 = builder.Build('nghttp2/lib/AMBuilder')
 libuv = builder.Build('libuv/src/AMBuilder')
 libz = builder.Build('zlib/AMBuilder')
 
 for cxx in builder.targets:
-  binary = Extension.Library(builder, cxx, 'rip.ext')
+  binary = Extension.Library(builder, cxx, 'crest.ext')
   arch = binary.compiler.target.arch
 
   binary.sources += [
@@ -20,13 +19,11 @@ for cxx in builder.targets:
     'httpfilecontext.cpp',
     'httpformcontext.cpp',
     'http_natives.cpp',
-    'json_natives.cpp',
     os.path.join(Extension.sm_root, 'public', 'smsdk_ext.cpp'),
   ]
 
   binary.compiler.includes += [
     os.path.join(builder.sourcePath, 'curl', 'include'),
-    os.path.join(builder.sourcePath, 'jansson', 'include'),
     os.path.join(builder.sourcePath, 'libuv', 'include'),
   ]
 
@@ -41,7 +38,6 @@ for cxx in builder.targets:
 
   binary.compiler.postlink += [
     libcurl[arch].binary,
-    libjansson[arch].binary,
     libmbedtls[arch].binary,
     libnghttp2[arch].binary,
     libuv[arch].binary,

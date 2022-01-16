@@ -24,15 +24,14 @@
 
 #include <string>
 #include <curl/curl.h>
-#include <jansson.h>
 #include <sm_stringhashmap.h>
 #include <stdlib.h>
 #include <string.h>
 #include <uv.h>
 #include "smsdk_ext.h"
 
-#define SM_RIPEXT_CA_BUNDLE_PATH "configs/ripext/ca-bundle.crt"
-#define SM_RIPEXT_USER_AGENT "sm-ripext/" SMEXT_CONF_VERSION
+#define SM_RIPEXT_CA_BUNDLE_PATH "configs/crest/ca-bundle.crt"
+#define SM_RIPEXT_USER_AGENT "crest/" SMEXT_CONF_VERSION
 
 extern uv_loop_t *g_Loop;
 
@@ -72,30 +71,12 @@ struct CurlContext {
 
 struct HTTPResponse {
 	long status = 0;
-	json_t *data = NULL;
+	char *data = NULL;
 	Handle_t hndlData = BAD_HANDLE;
 	HTTPHeaderMap headers;
 
 	char *body = NULL;
 	size_t size = 0;
-};
-
-struct JSONObjectKeys {
-	JSONObjectKeys(json_t *object) : object(object), iter(json_object_iter(object)) {}
-
-	const char *GetKey()
-	{
-		return json_object_iter_key(iter);
-	}
-
-	void Next()
-	{
-		iter = json_object_iter_next(object, iter);
-	}
-
-private:
-	json_t *object;
-	void *iter;
 };
 
 
@@ -197,18 +178,6 @@ public:
 	void OnHandleDestroy(HandleType_t type, void *object);
 };
 
-class JSONHandler : public IHandleTypeDispatch
-{
-public:
-	void OnHandleDestroy(HandleType_t type, void *object);
-};
-
-class JSONObjectKeysHandler : public IHandleTypeDispatch
-{
-public:
-	void OnHandleDestroy(HandleType_t type, void *object);
-};
-
 extern RipExt g_RipExt;
 
 extern HTTPClientHandler	g_HTTPClientHandler;
@@ -220,13 +189,6 @@ extern HandleType_t			htHTTPRequest;
 extern HTTPResponseHandler	g_HTTPResponseHandler;
 extern HandleType_t				htHTTPResponse;
 
-extern JSONHandler	g_JSONHandler;
-extern HandleType_t		htJSON;
-
-extern JSONObjectKeysHandler	g_JSONObjectKeysHandler;
-extern HandleType_t				htJSONObjectKeys;
-
 extern const sp_nativeinfo_t http_natives[];
-extern const sp_nativeinfo_t json_natives[];
 
 #endif // _INCLUDE_SOURCEMOD_EXTENSION_PROPER_H_

@@ -52,7 +52,7 @@ struct curl_slist *HTTPClient::BuildHeaders(const char *acceptTypes, const char 
 	return headers;
 }
 
-void HTTPClient::Request(const char *method, const char *endpoint, json_t *data, IPluginFunction *callback, cell_t value)
+void HTTPClient::Request(const char *method, const char *endpoint, char *data, IPluginFunction *callback, cell_t value)
 {
 	IChangeableForward *forward = forwards->CreateForwardEx(NULL, ET_Ignore, 3, NULL, Param_Cell, Param_Cell, Param_String);
 	if (forward == NULL || !forward->AddFunction(callback))

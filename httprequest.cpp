@@ -31,7 +31,7 @@ HTTPRequest::HTTPRequest(const std::string &url)
 	SetHeader("Content-Type", "application/json");
 }
 
-void HTTPRequest::Perform(const char *method, json_t *data, IChangeableForward *forward, cell_t value)
+void HTTPRequest::Perform(const char *method, char *data, IChangeableForward *forward, cell_t value)
 {
 	HTTPRequestContext *context = new HTTPRequestContext(method, BuildURL(), data, BuildHeaders(), forward, value,
 		connectTimeout, maxRedirects, timeout, maxSendSpeed, maxRecvSpeed, useBasicAuth, username, password);

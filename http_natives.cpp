@@ -38,21 +38,6 @@ static HTTPRequest *GetRequestFromHandle(IPluginContext *pContext, Handle_t hndl
 	return request;
 }
 
-static json_t *GetJSONFromHandle(IPluginContext *pContext, Handle_t hndl)
-{
-	HandleError err;
-	HandleSecurity sec(pContext->GetIdentity(), myself->GetIdentity());
-
-	json_t *json;
-	if ((err=handlesys->ReadHandle(hndl, htJSON, &sec, (void **)&json)) != HandleError_None)
-	{
-		pContext->ThrowNativeError("Invalid JSON handle %x (error %d)", hndl, err);
-		return NULL;
-	}
-
-	return json;
-}
-
 static cell_t CreateClient(IPluginContext *pContext, const cell_t *params)
 {
 	char *baseURL;
@@ -139,12 +124,8 @@ static cell_t PostRequest(IPluginContext *pContext, const cell_t *params)
 	char *endpoint;
 	pContext->LocalToString(params[2], &endpoint);
 
-	json_t *data;
-	Handle_t hndlData = static_cast<Handle_t>(params[3]);
-	if ((err=handlesys->ReadHandle(hndlData, htJSON, &sec, (void **)&data)) != HandleError_None)
-	{
-		return pContext->ThrowNativeError("Invalid data handle %x (error %d)", hndlData, err);
-	}
+	char *data;
+	pContext->LocalToString(params[3], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[4]);
 	cell_t value = params[5];
@@ -169,12 +150,8 @@ static cell_t PutRequest(IPluginContext *pContext, const cell_t *params)
 	char *endpoint;
 	pContext->LocalToString(params[2], &endpoint);
 
-	json_t *data;
-	Handle_t hndlData = static_cast<Handle_t>(params[3]);
-	if ((err=handlesys->ReadHandle(hndlData, htJSON, &sec, (void **)&data)) != HandleError_None)
-	{
-		return pContext->ThrowNativeError("Invalid data handle %x (error %d)", hndlData, err);
-	}
+	char *data;
+	pContext->LocalToString(params[3], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[4]);
 	cell_t value = params[5];
@@ -199,12 +176,8 @@ static cell_t PatchRequest(IPluginContext *pContext, const cell_t *params)
 	char *endpoint;
 	pContext->LocalToString(params[2], &endpoint);
 
-	json_t *data;
-	Handle_t hndlData = static_cast<Handle_t>(params[3]);
-	if ((err=handlesys->ReadHandle(hndlData, htJSON, &sec, (void **)&data)) != HandleError_None)
-	{
-		return pContext->ThrowNativeError("Invalid data handle %x (error %d)", hndlData, err);
-	}
+	char *data;
+	pContext->LocalToString(params[3], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[4]);
 	cell_t value = params[5];
@@ -625,11 +598,8 @@ static cell_t PerformPostRequest(IPluginContext *pContext, const cell_t *params)
 		return 0;
 	}
 
-	json_t *data = GetJSONFromHandle(pContext, params[2]);
-	if (data == NULL)
-	{
-		return 0;
-	}
+	char *data;
+	pContext->LocalToString(params[2], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[3]);
 	cell_t value = params[4];
@@ -657,11 +627,8 @@ static cell_t PerformPutRequest(IPluginContext *pContext, const cell_t *params)
 		return 0;
 	}
 
-	json_t *data = GetJSONFromHandle(pContext, params[2]);
-	if (data == NULL)
-	{
-		return 0;
-	}
+	char *data;
+	pContext->LocalToString(params[2], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[3]);
 	cell_t value = params[4];
@@ -689,11 +656,8 @@ static cell_t PerformPatchRequest(IPluginContext *pContext, const cell_t *params
 		return 0;
 	}
 
-	json_t *data = GetJSONFromHandle(pContext, params[2]);
-	if (data == NULL)
-	{
-		return 0;
-	}
+	char *data;
+	pContext->LocalToString(params[2], &data);
 
 	IPluginFunction *callback = pContext->GetFunctionById(params[3]);
 	cell_t value = params[4];
@@ -949,33 +913,10 @@ static cell_t GetResponseData(IPluginContext *pContext, const cell_t *params)
 	struct HTTPResponse *response;
 	Handle_t hndlResponse = static_cast<Handle_t>(params[1]);
 	if ((err=handlesys->ReadHandle(hndlResponse, htHTTPResponse, &sec, (void **)&response)) != HandleError_None)
-	{
-		pContext->ThrowNativeError("Invalid HTTP response handle %x (error %d)", hndlResponse, err);
-		return BAD_HANDLE;
-	}
+		return pContext->ThrowNativeError("Invalid HTTP response handle %x (error %d)", hndlResponse, err);
 
-	/* Return the same handle every time we get the HTTP response data */
-	if (response->hndlData == BAD_HANDLE)
-	{
-		json_error_t error;
-		response->data = json_loads(response->body, 0, &error);
-		if (response->data == NULL)
-		{
-			pContext->ThrowNativeError("Invalid JSON in line %d, column %d: %s", error.line, error.column, error.text);
-			return BAD_HANDLE;
-		}
-
-		response->hndlData = handlesys->CreateHandleEx(htJSON, response->data, &sec, NULL, NULL);
-		if (response->hndlData == BAD_HANDLE)
-		{
-			json_decref(response->data);
-
-			pContext->ThrowNativeError("Could not create data handle.");
-			return BAD_HANDLE;
-		}
-	}
-
-	return response->hndlData;
+	pContext->StringToLocalUTF8(params[2], params[3], (response->body), NULL);
+	return 0;
 }
 
 static cell_t GetResponseStatus(IPluginContext *pContext, const cell_t *params)
@@ -992,6 +933,20 @@ static cell_t GetResponseStatus(IPluginContext *pContext, const cell_t *params)
 
 	return response->status;
 }
+
+static cell_t GetResponseDataLength(IPluginContext *pContext, const cell_t *params)
+{
+	HandleError err;
+	HandleSecurity sec(pContext->GetIdentity(), myself->GetIdentity());
+
+	struct HTTPResponse *response;
+	Handle_t hndlResponse = static_cast<Handle_t>(params[1]);
+	if ((err=handlesys->ReadHandle(hndlResponse, htHTTPResponse, &sec, (void **)&response)) != HandleError_None)
+		return pContext->ThrowNativeError("Invalid HTTP response handle %x (error code %d)", hndlResponse, err);
+
+	return response->size;
+}
+
 
 static cell_t GetResponseHeader(IPluginContext *pContext, const cell_t *params)
 {
@@ -1028,51 +983,52 @@ static cell_t GetResponseHeader(IPluginContext *pContext, const cell_t *params)
 
 const sp_nativeinfo_t http_natives[] =
 {
-	{"HTTPClient.HTTPClient",			CreateClient},
-	{"HTTPClient.SetHeader",			SetClientHeader},
-	{"HTTPClient.Get",					GetRequest},
-	{"HTTPClient.Post",					PostRequest},
-	{"HTTPClient.Put",					PutRequest},
-	{"HTTPClient.Patch",				PatchRequest},
-	{"HTTPClient.Delete",				DeleteRequest},
-	{"HTTPClient.DownloadFile",			DownloadFile},
-	{"HTTPClient.UploadFile",			UploadFile},
-	{"HTTPClient.ConnectTimeout.get",	GetClientConnectTimeout},
-	{"HTTPClient.ConnectTimeout.set",	SetClientConnectTimeout},
-	{"HTTPClient.FollowLocation.get",	GetClientFollowLocation},
-	{"HTTPClient.FollowLocation.set",	SetClientFollowLocation},
-	{"HTTPClient.Timeout.get",			GetClientTimeout},
-	{"HTTPClient.Timeout.set",			SetClientTimeout},
-	{"HTTPClient.MaxSendSpeed.get",		GetClientMaxSendSpeed},
-	{"HTTPClient.MaxSendSpeed.set",		SetClientMaxSendSpeed},
-	{"HTTPClient.MaxRecvSpeed.get",		GetClientMaxRecvSpeed},
-	{"HTTPClient.MaxRecvSpeed.set",		SetClientMaxRecvSpeed},
-	{"HTTPRequest.HTTPRequest",			CreateRequest},
-	{"HTTPRequest.AppendFormParam",		AppendRequestFormParam},
-	{"HTTPRequest.AppendQueryParam",	AppendRequestQueryParam},
-	{"HTTPRequest.SetBasicAuth",		SetRequestBasicAuth},
-	{"HTTPRequest.SetHeader",			SetRequestHeader},
-	{"HTTPRequest.Get",					PerformGetRequest},
-	{"HTTPRequest.Post",				PerformPostRequest},
-	{"HTTPRequest.Put",					PerformPutRequest},
-	{"HTTPRequest.Patch",				PerformPatchRequest},
-	{"HTTPRequest.Delete",				PerformDeleteRequest},
-	{"HTTPRequest.DownloadFile",		PerformDownloadFile},
-	{"HTTPRequest.UploadFile",			PerformUploadFile},
-	{"HTTPRequest.PostForm",			PerformPostForm},
-	{"HTTPRequest.ConnectTimeout.get",	GetRequestConnectTimeout},
-	{"HTTPRequest.ConnectTimeout.set",	SetRequestConnectTimeout},
-	{"HTTPRequest.MaxRedirects.get",	GetRequestMaxRedirects},
-	{"HTTPRequest.MaxRedirects.set",	SetRequestMaxRedirects},
-	{"HTTPRequest.MaxRecvSpeed.get",	GetRequestMaxRecvSpeed},
-	{"HTTPRequest.MaxRecvSpeed.set",	SetRequestMaxRecvSpeed},
-	{"HTTPRequest.MaxSendSpeed.get",	GetRequestMaxSendSpeed},
-	{"HTTPRequest.MaxSendSpeed.set",	SetRequestMaxSendSpeed},
-	{"HTTPRequest.Timeout.get",			GetRequestTimeout},
-	{"HTTPRequest.Timeout.set",			SetRequestTimeout},
-	{"HTTPResponse.Data.get",			GetResponseData},
-	{"HTTPResponse.Status.get",			GetResponseStatus},
-	{"HTTPResponse.GetHeader",			GetResponseHeader},
+	{"HTTP.HTTP",				CreateClient},
+	{"HTTP.SetHeader",			SetClientHeader},
+	{"HTTP.Get",					GetRequest},
+	{"HTTP.Post",					PostRequest},
+	{"HTTP.Put",					PutRequest},
+	{"HTTP.Patch",				PatchRequest},
+	{"HTTP.Delete",				DeleteRequest},
+	{"HTTP.DownloadFile",			DownloadFile},
+	{"HTTP.UploadFile",			UploadFile},
+	{"HTTP.ConnectTimeout.get",	GetClientConnectTimeout},
+	{"HTTP.ConnectTimeout.set",	SetClientConnectTimeout},
+	{"HTTP.FollowLocation.get",	GetClientFollowLocation},
+	{"HTTP.FollowLocation.set",	SetClientFollowLocation},
+	{"HTTP.Timeout.get",			GetClientTimeout},
+	{"HTTP.Timeout.set",			SetClientTimeout},
+	{"HTTP.MaxSendSpeed.get",		GetClientMaxSendSpeed},
+	{"HTTP.MaxSendSpeed.set",		SetClientMaxSendSpeed},
+	{"HTTP.MaxRecvSpeed.get",		GetClientMaxRecvSpeed},
+	{"HTTP.MaxRecvSpeed.set",		SetClientMaxRecvSpeed},
+	{"HTTPReq.HTTPReq",				CreateRequest},
+	{"HTTPReq.AppendFormParam",		AppendRequestFormParam},
+	{"HTTPReq.AppendQueryParam",	AppendRequestQueryParam},
+	{"HTTPReq.SetBasicAuth",		SetRequestBasicAuth},
+	{"HTTPReq.SetHeader",			SetRequestHeader},
+	{"HTTPReq.Get",					PerformGetRequest},
+	{"HTTPReq.Post",				PerformPostRequest},
+	{"HTTPReq.Put",					PerformPutRequest},
+	{"HTTPReq.Patch",				PerformPatchRequest},
+	{"HTTPReq.Delete",				PerformDeleteRequest},
+	{"HTTPReq.DownloadFile",		PerformDownloadFile},
+	{"HTTPReq.UploadFile",			PerformUploadFile},
+	{"HTTPReq.PostForm",			PerformPostForm},
+	{"HTTPReq.ConnectTimeout.get",	GetRequestConnectTimeout},
+	{"HTTPReq.ConnectTimeout.set",	SetRequestConnectTimeout},
+	{"HTTPReq.MaxRedirects.get",	GetRequestMaxRedirects},
+	{"HTTPReq.MaxRedirects.set",	SetRequestMaxRedirects},
+	{"HTTPReq.MaxRecvSpeed.get",	GetRequestMaxRecvSpeed},
+	{"HTTPReq.MaxRecvSpeed.set",	SetRequestMaxRecvSpeed},
+	{"HTTPReq.MaxSendSpeed.get",	GetRequestMaxSendSpeed},
+	{"HTTPReq.MaxSendSpeed.set",	SetRequestMaxSendSpeed},
+	{"HTTPReq.Timeout.get",			GetRequestTimeout},
+	{"HTTPReq.Timeout.set",			SetRequestTimeout},
+	{"HTTPRes.GetData",			GetResponseData},
+	{"HTTPRes.Status.get",			GetResponseStatus},
+	{"HTTPRes.DataLength.get",		GetResponseDataLength},
+	{"HTTPRes.GetHeader",			GetResponseHeader},
 
 	{NULL,								NULL}
 };
