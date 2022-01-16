@@ -88,10 +88,7 @@ HTTPRequestContext::HTTPRequestContext(const std::string &method, const std::str
 	maxRecvSpeed(maxRecvSpeed), useBasicAuth(useBasicAuth), username(username), password(password)
 {
 	size = (data != NULL) ? strlen(data) : 0;
-
-	if (data != NULL)
-		memcpy(body, data, size);
-
+	body = data;
 }
 
 HTTPRequestContext::~HTTPRequestContext()
@@ -100,7 +97,7 @@ HTTPRequestContext::~HTTPRequestContext()
 
 	curl_easy_cleanup(curl);
 	curl_slist_free_all(headers);
-	free(body);
+	body = NULL;
 	free(response.body);
 }
 
