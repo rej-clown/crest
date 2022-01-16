@@ -28,12 +28,12 @@
  */
 
 /* Basic information exposed publicly */
-#define SMEXT_CONF_NAME			"REST in Pawn"
-#define SMEXT_CONF_DESCRIPTION	"Provides HTTP and JSON natives for plugins"
+#define SMEXT_CONF_NAME			"C REST"
+#define SMEXT_CONF_DESCRIPTION	"Provides HTTP natives for plugins"
 #define SMEXT_CONF_VERSION		"1.4.0_exp"
 #define SMEXT_CONF_AUTHOR		"Tsunami (Forked by rej.chev?)"
 #define SMEXT_CONF_URL			"http://www.tsunami-productions.nl"
-#define SMEXT_CONF_LOGTAG		"RIPEXT"
+#define SMEXT_CONF_LOGTAG		"CREST"
 #define SMEXT_CONF_LICENSE		"GPL"
 #define SMEXT_CONF_DATESTRING	__DATE__
 

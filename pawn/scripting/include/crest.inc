@@ -1,7 +1,7 @@
-#if defined _ripext_included_
+#if defined _crest_included_
 	#endinput
 #endif
-#define _ripext_included_
+#define _crest_included_
 
 enum HTTPStatus
 {
@@ -71,8 +71,8 @@ enum HTTPStatus
 
 typeset HTTPRequestCallback
 {
-	function void (HTTPResponse response, any value);
-	function void (HTTPResponse response, any value, const char[] error);
+	function void (HTTPRes response, any value);
+	function void (HTTPRes response, any value, const char[] error);
 };
 
 typeset HTTPFileCallback
@@ -81,7 +81,7 @@ typeset HTTPFileCallback
 	function void (HTTPStatus status, any value, const char[] error);
 };
 
-methodmap HTTPRequest < Handle
+methodmap HTTPReq < Handle
 {
 	// Creates an HTTP request.
 	//
@@ -89,7 +89,7 @@ methodmap HTTPRequest < Handle
 	// Otherwise, the Handle must be freed via delete or CloseHandle().
 	//
 	// @param url        URL to the REST API endpoint.
-	public native HTTPRequest(const char[] url);
+	public native HTTPReq(const char[] url);
 
 	// Appends a parameter to the form data.
 	//
@@ -223,7 +223,7 @@ methodmap HTTPRequest < Handle
 	}
 }
 
-methodmap HTTPResponse
+methodmap HTTPRes
 {
 	// Retrieves an HTTP header from the response.
 	//
@@ -251,22 +251,22 @@ methodmap HTTPResponse
 	}
 };
 
-// Deprecated. Use HTTPRequest instead.
-methodmap HTTPClient < Handle
+// Deprecated. Use HTTPReq instead.
+methodmap HTTP < Handle
 {
 	// Creates an HTTP client.
 	//
-	// The HTTPClient must be freed via delete or CloseHandle().
+	// The HTTP must be freed via delete or CloseHandle().
 	//
 	// @param baseURL    Base URL to the REST API.
-	#pragma deprecated Use HTTPRequest instead.
-	public native HTTPClient(const char[] baseURL);
+	#pragma deprecated Use HTTPReq instead.
+	public native HTTP(const char[] baseURL);
 
 	// Sets an HTTP header to be used for all requests.
 	//
 	// @param name       Header name.
 	// @param value      String value to set.
-	#pragma deprecated Use HTTPRequest.SetHeader() instead.
+	#pragma deprecated Use HTTPReq.SetHeader() instead.
 	public native void SetHeader(const char[] name, const char[] value);
 
 	// Performs an HTTP GET request.
@@ -274,7 +274,7 @@ methodmap HTTPClient < Handle
 	// @param endpoint   API endpoint to request.
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
-	#pragma deprecated Use HTTPRequest.Get() instead.
+	#pragma deprecated Use HTTPReq.Get() instead.
 	public native void Get(const char[] endpoint, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP POST request.
@@ -283,7 +283,7 @@ methodmap HTTPClient < Handle
 	// @param data       JSON data to send.
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
-	#pragma deprecated Use HTTPRequest.Post() instead.
+	#pragma deprecated Use HTTPReq.Post() instead.
 	public native void Post(const char[] endpoint, const char[] data, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP PUT request.
@@ -292,7 +292,7 @@ methodmap HTTPClient < Handle
 	// @param data       JSON data to send.
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
-	#pragma deprecated Use HTTPRequest.Put() instead.
+	#pragma deprecated Use HTTPReq.Put() instead.
 	public native void Put(const char[] endpoint, const char[] data, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP PATCH request.
@@ -301,7 +301,7 @@ methodmap HTTPClient < Handle
 	// @param data       JSON data to send.
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
-	#pragma deprecated Use HTTPRequest.Patch() instead.
+	#pragma deprecated Use HTTPReq.Patch() instead.
 	public native void Patch(const char[] endpoint, const char[] data, HTTPRequestCallback callback, any value = 0);
 
 	// Performs an HTTP DELETE request.
@@ -309,7 +309,7 @@ methodmap HTTPClient < Handle
 	// @param endpoint   API endpoint to request.
 	// @param callback   A function to use as a callback when the request has finished.
 	// @param value      Optional value to pass to the callback function.
-	#pragma deprecated Use HTTPRequest.Delete() instead.
+	#pragma deprecated Use HTTPReq.Delete() instead.
 	public native void Delete(const char[] endpoint, HTTPRequestCallback callback, any value = 0);
 
 	// Downloads a file.
@@ -318,7 +318,7 @@ methodmap HTTPClient < Handle
 	// @param path       File path to write to.
 	// @param callback   A function to use as a callback when the download has finished.
 	// @param value      Optional value to pass to the callback function.
-	#pragma deprecated Use HTTPRequest.DownloadFile() instead.
+	#pragma deprecated Use HTTPReq.DownloadFile() instead.
 	public native void DownloadFile(const char[] endpoint, const char[] path, HTTPFileCallback callback, any value = 0);
 
 	// Uploads a file.
@@ -329,39 +329,39 @@ methodmap HTTPClient < Handle
 	// @param path       File path to read from.
 	// @param callback   A function to use as a callback when the upload has finished.
 	// @param value      Optional value to pass to the callback function.
-	#pragma deprecated Use HTTPRequest.UploadFile() instead.
+	#pragma deprecated Use HTTPReq.UploadFile() instead.
 	public native void UploadFile(const char[] endpoint, const char[] path, HTTPFileCallback callback, any value = 0);
 
 	// Connect timeout in seconds. Defaults to 10.
-	#pragma deprecated Use HTTPRequest.ConnectTimeout instead.
+	#pragma deprecated Use HTTPReq.ConnectTimeout instead.
 	property int ConnectTimeout {
 		public native get();
 		public native set(int connectTimeout);
 	}
 
 	// Follow HTTP 3xx redirects. Defaults to true.
-	#pragma deprecated Use HTTPRequest.MaxRedirects instead.
+	#pragma deprecated Use HTTPReq.MaxRedirects instead.
 	property bool FollowLocation {
 		public native get();
 		public native set(bool followLocation);
 	}
 
 	// Timeout in seconds. Defaults to 30.
-	#pragma deprecated Use HTTPRequest.Timeout instead.
+	#pragma deprecated Use HTTPReq.Timeout instead.
 	property int Timeout {
 		public native get();
 		public native set(int timeout);
 	}
 
 	// Maximum upload speed in bytes per second. Defaults to unlimited speed.
-	#pragma deprecated Use HTTPRequest.MaxSendSpeed instead.
+	#pragma deprecated Use HTTPReq.MaxSendSpeed instead.
 	property int MaxSendSpeed {
 		public native get();
 		public native set(int speed);
 	}
 
 	// Maximum download speed in bytes per second. Defaults to unlimited speed.
-	#pragma deprecated Use HTTPRequest.MaxRecvSpeed instead.
+	#pragma deprecated Use HTTPReq.MaxRecvSpeed instead.
 	property int MaxRecvSpeed {
 		public native get();
 		public native set(int speed);
@@ -372,10 +372,10 @@ methodmap HTTPClient < Handle
 /**
  * Do not edit below this line!
  */
-public Extension __ext_rip =
+public Extension __ext_crest =
 {
-	name = "REST in Pawn",
-	file = "rip.ext",
+	name = "C REST",
+	file = "crest.ext",
 #if defined AUTOLOAD_EXTENSIONS
 	autoload = 1,
 #else

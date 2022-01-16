@@ -12,7 +12,7 @@ folder_list = [
   # 'addons/sourcemod/scripting/include/ripext',
   #'addons/sourcemod/gamedata',
   #'addons/sourcemod/configs',
-  'addons/sourcemod/configs/ripext',
+  'addons/sourcemod/configs/crest',
 ]
 
 if 'x86_64' in Extension.target_archs:
@@ -37,7 +37,7 @@ def CopyFiles(src, dest, files):
 
 # Include files
 CopyFiles('pawn/scripting/include', 'addons/sourcemod/scripting/include',
-  [ 'ripext.inc' ]
+  [ 'crest.inc' ]
 )
 # CopyFiles('pawn/scripting/include/ripext', 'addons/sourcemod/scripting/include/ripext',
 #   [ 'http.inc' ]
@@ -56,7 +56,7 @@ CopyFiles('pawn/scripting/include', 'addons/sourcemod/scripting/include',
 #  'otherconfig.cfg,
 #  ]
 #)
-CopyFiles('pawn/configs/ripext', 'addons/sourcemod/configs/ripext',
+CopyFiles('pawn/configs/crest', 'addons/sourcemod/configs/crest',
   [ 'ca-bundle.crt' ]
 )
 

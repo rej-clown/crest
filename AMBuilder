@@ -8,7 +8,7 @@ libuv = builder.Build('libuv/src/AMBuilder')
 libz = builder.Build('zlib/AMBuilder')
 
 for cxx in builder.targets:
-  binary = Extension.Library(builder, cxx, 'rip.ext')
+  binary = Extension.Library(builder, cxx, 'crest.ext')
   arch = binary.compiler.target.arch
 
   binary.sources += [
