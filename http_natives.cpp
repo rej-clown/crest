@@ -915,7 +915,7 @@ static cell_t GetResponseData(IPluginContext *pContext, const cell_t *params)
 	if ((err=handlesys->ReadHandle(hndlResponse, htHTTPResponse, &sec, (void **)&response)) != HandleError_None)
 		return pContext->ThrowNativeError("Invalid HTTP response handle %x (error %d)", hndlResponse, err);
 
-	pContext->StringToLocal(params[1], params[2], (response->body));
+	pContext->StringToLocalUTF8(params[2], params[3], (response->body), NULL);
 	return 0;
 }
 
