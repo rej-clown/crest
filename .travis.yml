@@ -31,5 +31,24 @@ before_script:
   - mkdir $TRAVIS_BUILD_DIR/build && cd $TRAVIS_BUILD_DIR/build
 
 script:
-  - python ../configure.py --enable-optimize
+  - python ../configure.py --enable-optimize --targets=$TARGET_ARCH
   - ambuild
+
+before_deploy:
+    - cd $TRAVIS_BUILD_DIR/build/package
+    - zip -r crest-${TRAVIS_OS_NAME}-${TRAVIS_BUILD_NUMBER}.zip *
+    - mkdir $TRAVIS_BUILD_DIR/deploy
+    - cp $TRAVIS_BUILD_DIR/build/package/crest-${TRAVIS_OS_NAME}-${TRAVIS_BUILD_NUMBER}.zip $TRAVIS_BUILD_DIR/deploy
+
+deploy:
+  provider: releases
+  token:
+    secure: IN4z91bO27nvEUuWbe05j4yhqGJjSX67PAc0T7MqxzFrXKRyA3nyUrEHO6b3gp70IedNXxbwqfoCxN+FZGStJeAyEULHkTzl7GC9hCIHv+HW+1R6ZGAxkf2PZFyHrW85TaJ8mK3MfzxlSEUGgJoZXMpMHS0KLHgzXgDGg2+bto3Ijc9hY7Bqc7iMZqJxUfhQ1mrJua75vrvG/fQ3Q1dIzQTUqejDK9rfdOOuEnqXP2WGwXlbsdyz/3J1V2QPTbZzm4hjxYAGX20nXElW6cngreOfciihZKRZOc57L3Tc5MKf30bRWBQXBQgAPycO9tGaDcW9LI2mYasaPwHCLwNjrvWeNisY8C/XfoY249eDcjDLFbXELljNIaIyKwMxV9X5vOI2ue24sqCzquSijJT5/N+X+eGA9GyfAVs6/FRDdkW7k7BauaFkQxQNy6j0dJFl3AZXJ6vWPu7r2MwyXblrSV65LxuMZEHGRZl/bTK/BoyrhyEqKtLLjwt+eIaArg2JaQAU09OHj5MDDd2koP9IEYowoJ86wdazuBVYYPos5EpS9ub1DAjHQL5HRytVM/0gmCN9PFrk2jvsB8n+C62molU2+bJSK4nbDBcdKio98y86t79MClqSB+SrEur6t+nre8/PiXWhiDMi8F67WsobAIXPXO1xcsalgect7IV6lJI=
+  file_glob: true
+  file: $TRAVIS_BUILD_DIR/deploy/*
+  skip_cleanup: true
+  on:
+    tags: true
+  
+notifications:
+    email: false
