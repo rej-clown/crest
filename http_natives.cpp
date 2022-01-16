@@ -1002,7 +1002,7 @@ const sp_nativeinfo_t http_natives[] =
 	{"HTTP.MaxSendSpeed.set",		SetClientMaxSendSpeed},
 	{"HTTP.MaxRecvSpeed.get",		GetClientMaxRecvSpeed},
 	{"HTTP.MaxRecvSpeed.set",		SetClientMaxRecvSpeed},
-	{"HTTPReq.HTTPRequest",			CreateRequest},
+	{"HTTPReq.HTTPReq",				CreateRequest},
 	{"HTTPReq.AppendFormParam",		AppendRequestFormParam},
 	{"HTTPReq.AppendQueryParam",	AppendRequestQueryParam},
 	{"HTTPReq.SetBasicAuth",		SetRequestBasicAuth},

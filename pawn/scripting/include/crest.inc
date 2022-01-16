@@ -223,7 +223,7 @@ methodmap HTTPReq < Handle
 	}
 }
 
-methodmap HTTPRes
+methodmap HTTPRes < Handle
 {
 	// Retrieves an HTTP header from the response.
 	//
