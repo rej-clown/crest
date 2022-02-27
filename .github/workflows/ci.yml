@@ -84,9 +84,9 @@ jobs:
       - name: Package
         run: |
           version=`echo $GITHUB_REF | sed "s/refs\/tags\///"`
-          7z a sm-ripext-${version}-linux.zip ./Linux/*
-          7z a sm-ripext-${version}-mac.zip ./macOS/*
-          7z a sm-ripext-${version}-windows.zip ./Windows/*
+          7z a crest-${version}-linux.zip ./Linux/*
+          7z a crest-${version}-mac.zip ./macOS/*
+          7z a crest-${version}-windows.zip ./Windows/*
 
       - name: Release
         uses: svenstaro/upload-release-action@v2
